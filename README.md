@@ -1,3 +1,5 @@
+上课资料：https://pan.baidu.com/share/init?surl=sKZ9DoIVFWefKZGl0QVFEw&pwd=rvff
+
 官方文档：https://scikit-learn.org/stable/
 
 机器学习可用公开数据集
