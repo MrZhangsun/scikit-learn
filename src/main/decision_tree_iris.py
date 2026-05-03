@@ -5,7 +5,9 @@ import pandas as pd
 from sklearn.preprocessing import LabelEncoder, StandardScaler
 from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeClassifier
+from sklearn import tree
 from sklearn.metrics import classification_report, auc, roc_curve
+import pydotplus
 
 plt.rcParams['font.sans-serif'] = ['PingFang HK']  # mac常用中文字体
 plt.rcParams['axes.unicode_minus'] = False         # 解决负号显示问题
@@ -102,7 +104,13 @@ for key in class_dict:
     print("auc:", auc_area)
     ax.plot(fpr, tpr, f'{class_dict[key][0]}-o')
 
-plt.show()
+# plt.show()
 # 六、模型保存
 
+dot_data = tree.export_graphviz(model, out_file=None,
+                     class_names=["Iris-setosa", "Iris-versicolor", "Iris-virginica"],
+                     filled=True, rounded=True, special_characters=True, node_ids= True)
+graph = pydotplus.graph_from_dot_data(dot_data)
+graph.write_png("iris.png")
+print(dot_data)
 
