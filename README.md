@@ -12,3 +12,5 @@
 • http://www.sogou.com/labs/resource/listpingce.php
 • https://tianchi.aliyun.com/datalab/index.htm
 • http://www.pkbigdata.com/common/cmptlndex.html
+机器学习数据集
+https://www.openml.org
