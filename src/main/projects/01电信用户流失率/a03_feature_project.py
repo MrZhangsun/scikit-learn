@@ -22,6 +22,7 @@
 
 """
 import pandas as pd
+from pathlib import Path
 
 """
 特征工程
@@ -30,7 +31,7 @@ import pandas as pd
 2.特征编码：对离散特征进行编码
 """
 
-from sklearn.preprocessing import StandardScaler, OneHotEncoder
+from sklearn.preprocessing import StandardScaler, OneHotEncoder, OrdinalEncoder
 from a01_load_data import process_nan
 
 def feature_selection(raw_data):
@@ -41,6 +42,9 @@ def feature_selection(raw_data):
 
     # 2. 删除重复特征：通过相关系数法，卡方检验等衡量相关性的方法，来判断是否需要删除
     raw_data.drop(['TotalCharges'], axis=1, inplace=True)
+
+    # print(raw_data.info())
+    # print(raw_data.describe())
     return raw_data
 
 def standardize(raw_data):
@@ -108,7 +112,49 @@ def feature_encoding(raw_data):
     # 拼接标签
     return pd.concat([X, y], axis=1)
 
-def feature_engineering():
+def feature_balance(X, y, categorical_features=None):
+    # pip install imbalanced-learn
+    from imblearn.over_sampling import SMOTENC
+    """
+    SMOTE 是机器学习里非常经典的：少数类过采样（Oversampling）技术。全称：
+    Synthetic Minority Over-sampling Technique 它专门解决：类别不平衡 问题。
+    什么是类别不平衡，例如：银行欺诈检测：
+        类别	数量
+        正常交易	9900
+        欺诈交易	100
+    此时：欺诈样本太少，模型会倾向：全部预测正常，甚至：准确率99%，但：毫无意义
+    因为：少数类完全学不到，最简单的解决办法
+        方法1：欠采样（Undersampling）
+            减少多数类：9900 → 100
+            问题：浪费大量数据
+        方法2：过采样（Oversampling）
+            增加少数类。最简单：直接复制少数类，例如：100 → 1000
+            问题：容易过拟合，模型会：死记硬背
+        SMOTE 的核心思想：SMOTE 不直接复制。而是：“人工合成新的少数类样本”。
+        所以：Synthetic，就是：合成
+    """
+    # print(y.value_counts())
+    # smote = SMOTE(random_state=43, sampling_strategy='minority', k_neighbors=5)
+    smote_nc = SMOTENC(random_state=43, sampling_strategy='minority', k_neighbors=5,
+                       categorical_features=categorical_features)
+    X_smote, y_smote = smote_nc.fit_resample(X, y)
+    data_smote = pd.concat(
+        [
+            X_smote,
+            y_smote.to_frame()
+        ],
+        axis=1
+    )
+
+    # print(y_smote.value_counts())
+    return data_smote
+
+def feature_engineering(rebuild=False):
+    # 输出路径
+    output_path = Path(__file__).parent.joinpath('./datas/processed_data.csv')
+
+    if output_path.exists() and not rebuild:
+        return output_path
     # 数据空值处理
     the_raw_data = process_nan()
     # 标准化
@@ -117,14 +163,15 @@ def feature_engineering():
     the_encoded_data = feature_encoding(the_standardized_data)
     # 特征选择
     the_selected_features = feature_selection(the_encoded_data)
-    print(the_selected_features.shape)
-    print(the_selected_features.info())
-    print(the_selected_features.describe())
+    # # 数据平衡
+    # the_balanced_data = feature_balance(the_selected_features.drop(columns=['Churn']),
+    #                                     the_selected_features['Churn'])
     # 数据保存
-    the_selected_features.to_csv('./datas/processed_data.csv', index=False)
+    the_selected_features.to_csv(output_path, index=False)
+    return output_path
 
 if __name__ == '__main__':
-    feature_engineering()
+    feature_engineering(rebuild=True)
 
 
 

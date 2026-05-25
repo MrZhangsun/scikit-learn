@@ -64,7 +64,7 @@ ax3 = fig.add_subplot(313)
 ax3.set_title('TotalCharges特征分布箱线图')
 total_charges = raw_data["TotalCharges"].tolist()
 ax3.boxplot(total_charges, vert=False, showmeans=True,)
-print(raw_data["TotalCharges"].describe())
+# print(raw_data["TotalCharges"].describe())
 
 plt.subplots_adjust(hspace=0.5)
 plt.close(fig)
